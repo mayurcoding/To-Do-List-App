@@ -1,6 +1,5 @@
 # Todo List App using React Context API
 
-![App Screenshot](screenshots/todo-app.png)
 ## 📌 Introduction
 This is a **simple Todo List application** built using **React and Context API** for state management. It allows users to **add, edit, and delete tasks** while managing state globally without using Redux.
 

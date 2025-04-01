@@ -1,25 +1,20 @@
-import logo from './logo.svg';
-import './App.css';
+import { TodoProvider } from "./context/TodoContext";
+import TodoForm from "./components/TodoForm";
+import TodoList from "./components/TodoList";
+import FilterTodos from "./components/FilterTodos";
+import "./styles.css";  // Import global styles
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    return (
+        <TodoProvider>
+            <div className="app-container">
+                <h1>Todo List</h1>
+                <TodoForm />
+                <FilterTodos />
+                <TodoList />
+            </div>
+        </TodoProvider>
+    );
 }
 
 export default App;

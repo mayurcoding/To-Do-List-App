@@ -1,70 +1,218 @@
-# Getting Started with Create React App
+# Todo List App using React Context API
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## 📌 Introduction
+This is a **simple Todo List application** built using **React and Context API** for state management. It allows users to **add, edit, and delete tasks** while managing state globally without using Redux.
 
-## Available Scripts
+## 🚀 Features
+- ✅ **Add New Todos**
+- ✏️ **Edit Existing Todos**
+- 🗑️ **Delete Todos**
+- 📂 **State Management with Context API**
+- 🎨 **Basic Styling (CSS)**
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## 📂 Project Structure
+```
+📦 todolist-withcontextapi
+├── 📁 src
+│   ├── 📁 components
+│   │   ├── 📄 TodoForm.js    # Input form to add new tasks
+│   │   ├── 📄 TodoList.js    # Displays all todos
+│   │   ├── 📄 TodoItem.js    # Individual todo item (edit & delete)
+│   ├── 📁 context
+│   │   ├── 📄 TodoContext.js  # Global state management
+│   ├── 📄 App.js         # Main component
+│   ├── 📄 index.js       # Entry point
+│   ├── 📄 styles.css     # App styling
+├── 📄 package.json       # Dependencies & scripts
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 🛠️ Installation & Setup
+### 1️⃣ Clone the repository
+```bash
+git clone https://github.com/yourusername/todolist-withcontextapi.git
+cd todolist-withcontextapi
+```
 
-### `npm test`
+### 2️⃣ Install dependencies
+```bash
+npm install
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 3️⃣ Start the application
+```bash
+npm start
+```
+The app will run on `http://localhost:3000/`
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 🔧 Code Explanation
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### **1️⃣ Context API for State Management (`TodoContext.js`)**
+```jsx
+import React, { createContext, useState } from "react";
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+export const TodoContext = createContext();
 
-### `npm run eject`
+export const TodoProvider = ({ children }) => {
+    const [todos, setTodos] = useState([]);
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+    // Add a new todo
+    const addTodo = (text) => {
+        if (text.trim() !== "") {
+            const newTodo = { id: Date.now(), text };
+            setTodos([...todos, newTodo]);
+        }
+    };
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+    // Edit a todo
+    const editTodo = (id, newText) => {
+        setTodos((prevTodos) =>
+            prevTodos.map((todo) =>
+                todo.id === id ? { ...todo, text: newText } : todo
+            )
+        );
+    };
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+    // Remove a todo
+    const removeTodo = (id) => {
+        setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
+    };
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+    return (
+        <TodoContext.Provider value={{ todos, addTodo, editTodo, removeTodo }}>
+            {children}
+        </TodoContext.Provider>
+    );
+};
+```
 
-## Learn More
+### **2️⃣ Todo Input Form (`TodoForm.js`)**
+```jsx
+import React, { useState, useContext } from "react";
+import { TodoContext } from "../context/TodoContext";
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+const TodoForm = () => {
+    const [text, setText] = useState("");
+    const { addTodo } = useContext(TodoContext);
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        addTodo(text);
+        setText(""); // Clear input field
+    };
 
-### Code Splitting
+    return (
+        <form className="todo-form" onSubmit={handleSubmit}>
+            <input
+                type="text"
+                placeholder="Enter a new task..."
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                required
+            />
+            <button type="submit">Add</button>
+        </form>
+    );
+};
+export default TodoForm;
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### **3️⃣ Todo List Display (`TodoList.js`)**
+```jsx
+import React, { useContext } from "react";
+import { TodoContext } from "../context/TodoContext";
+import TodoItem from "./TodoItem";
 
-### Analyzing the Bundle Size
+const TodoList = () => {
+    const { todos } = useContext(TodoContext);
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+    return (
+        <ul className="todo-list">
+            {todos.map((todo) => (
+                <TodoItem key={todo.id} todo={todo} />
+            ))}
+        </ul>
+    );
+};
+export default TodoList;
+```
 
-### Making a Progressive Web App
+### **4️⃣ Individual Todo Item (`TodoItem.js`)**
+```jsx
+import React, { useContext, useState } from "react";
+import { TodoContext } from "../context/TodoContext";
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+const TodoItem = ({ todo }) => {
+    const { editTodo, removeTodo } = useContext(TodoContext);
+    const [isEditing, setIsEditing] = useState(false);
+    const [newText, setNewText] = useState(todo.text);
 
-### Advanced Configuration
+    const handleEdit = () => {
+        if (isEditing && newText.trim() !== "") {
+            editTodo(todo.id, newText.trim());
+        }
+        setIsEditing(!isEditing);
+    };
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+    return (
+        <li className="todo-item">
+            {isEditing ? (
+                <input
+                    type="text"
+                    value={newText}
+                    onChange={(e) => setNewText(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleEdit()}
+                    autoFocus
+                />
+            ) : (
+                <span>{todo.text}</span>
+            )}
+            <div className="todo-actions">
+                <button className="edit-btn" onClick={handleEdit}>
+                    {isEditing ? "Save" : "Edit"}
+                </button>
+                <button className="delete-btn" onClick={() => removeTodo(todo.id)}>
+                    Delete
+                </button>
+            </div>
+        </li>
+    );
+};
+export default TodoItem;
+```
 
-### Deployment
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## 🎨 Styling (`styles.css`)
+```css
+.todo-list {
+    list-style-type: none;
+    padding: 0;
+}
+.todo-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: #f4f4f4;
+    margin: 5px 0;
+    border-radius: 5px;
+}
+.edit-btn, .delete-btn {
+    margin-left: 5px;
+    cursor: pointer;
+}
+```
 
-### `npm run build` fails to minify
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## 🏁 Conclusion
+This **Todo List App** demonstrates how to use **Context API for state management** in React. You can **add, edit, and delete tasks** efficiently while keeping state centralized.
+
+Enjoy coding! 🚀
+

@@ -1,5 +1,4 @@
 # Todo List App using React Context API
-
 ## 📌 Introduction
 This is a **simple Todo List application** built using **React and Context API** for state management. It allows users to **add, edit, and delete tasks** while managing state globally without using Redux.
 
@@ -253,3 +252,188 @@ By implementing these features, you can further enhance the usability and functi
 ---
 
 Feel free to explore and customize the app to suit your needs. Happy coding! 🎉
+## 🌟 Additional Features
+
+### **5️⃣ Mark Todos as Completed**
+```jsx
+// Updated TodoContext.js
+const toggleComplete = (id) => {
+    setTodos((prevTodos) =>
+        prevTodos.map((todo) =>
+            todo.id === id ? { ...todo, completed: !todo.completed } : todo
+        )
+    );
+};
+
+// Add toggleComplete to the context provider
+<TodoContext.Provider value={{ todos, addTodo, editTodo, removeTodo, toggleComplete }}>
+    {children}
+</TodoContext.Provider>;
+```
+
+```jsx
+// Updated TodoItem.js
+const { toggleComplete } = useContext(TodoContext);
+
+return (
+    <li className={`todo-item ${todo.completed ? "completed" : ""}`}>
+        <input
+            type="checkbox"
+            checked={todo.completed}
+            onChange={() => toggleComplete(todo.id)}
+        />
+        {isEditing ? (
+            <input
+                type="text"
+                value={newText}
+                onChange={(e) => setNewText(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleEdit()}
+                autoFocus
+            />
+        ) : (
+            <span>{todo.text}</span>
+        )}
+        <div className="todo-actions">
+            <button className="edit-btn" onClick={handleEdit}>
+                {isEditing ? "Save" : "Edit"}
+            </button>
+            <button className="delete-btn" onClick={() => removeTodo(todo.id)}>
+                Delete
+            </button>
+        </div>
+    </li>
+);
+```
+
+### **6️⃣ Persistent Storage with Local Storage**
+```jsx
+// Updated TodoContext.js
+import { useEffect } from "react";
+
+useEffect(() => {
+    const storedTodos = JSON.parse(localStorage.getItem("todos")) || [];
+    setTodos(storedTodos);
+}, []);
+
+useEffect(() => {
+    localStorage.setItem("todos", JSON.stringify(todos));
+}, [todos]);
+```
+
+### **7️⃣ Search and Filter Todos**
+```jsx
+// New SearchBar.js
+import React, { useState, useContext } from "react";
+import { TodoContext } from "../context/TodoContext";
+
+const SearchBar = () => {
+    const [searchTerm, setSearchTerm] = useState("");
+    const { todos } = useContext(TodoContext);
+
+    const filteredTodos = todos.filter((todo) =>
+        todo.text.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    return (
+        <div>
+            <input
+                type="text"
+                placeholder="Search todos..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <ul className="todo-list">
+                {filteredTodos.map((todo) => (
+                    <TodoItem key={todo.id} todo={todo} />
+                ))}
+            </ul>
+        </div>
+    );
+};
+
+export default SearchBar;
+```
+
+### **8️⃣ Due Dates for Todos**
+```jsx
+// Updated TodoForm.js
+const [dueDate, setDueDate] = useState("");
+
+const handleSubmit = (e) => {
+    e.preventDefault();
+    addTodo({ text, dueDate });
+    setText("");
+    setDueDate("");
+};
+
+return (
+    <form className="todo-form" onSubmit={handleSubmit}>
+        <input
+            type="text"
+            placeholder="Enter a new task..."
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            required
+        />
+        <input
+            type="date"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+        />
+        <button type="submit">Add</button>
+    </form>
+);
+```
+
+### **9️⃣ Dark Mode**
+```jsx
+// New ThemeContext.js
+import React, { createContext, useState } from "react";
+
+export const ThemeContext = createContext();
+
+export const ThemeProvider = ({ children }) => {
+    const [isDarkMode, setIsDarkMode] = useState(false);
+
+    const toggleTheme = () => setIsDarkMode(!isDarkMode);
+
+    return (
+        <ThemeContext.Provider value={{ isDarkMode, toggleTheme }}>
+            {children}
+        </ThemeContext.Provider>
+    );
+};
+```
+
+```jsx
+// Updated App.js
+import { ThemeContext } from "./context/ThemeContext";
+
+const { isDarkMode, toggleTheme } = useContext(ThemeContext);
+
+return (
+    <div className={isDarkMode ? "dark-mode" : "light-mode"}>
+        <button onClick={toggleTheme}>
+            {isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+        </button>
+        <TodoForm />
+        <TodoList />
+    </div>
+);
+```
+
+```css
+/* Updated styles.css */
+body.dark-mode {
+    background-color: #121212;
+    color: #ffffff;
+}
+body.light-mode {
+    background-color: #ffffff;
+    color: #000000;
+}
+```
+
+--- 
+
+These enhancements make the app more functional and user-friendly. 🎉
